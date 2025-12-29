@@ -1,0 +1,9 @@
+---
+alwaysApply: true
+---
+
+# OpenAI 使用規則
+
+## 基本規則
+- **文字生成/對話模型（如 gpt-4o-mini、gpt-4.1、gpt-5 系列等）盡量使用 Responses API** 代替 Chat Completions，除非強制指定。
+- 使用 `instructions` 代替 `messages` 中的 `role: "system"`
