@@ -10,6 +10,17 @@
 import { onRequest } from "firebase-functions/https";
 import { defineSecret } from "firebase-functions/params";
 
+// Middleware
+import { 
+  requestLogger,
+  createRateLimiter,
+  createFirestoreRateLimiter,
+  createJwtAuth,
+  createApiKeyAuth,
+  errorHandler,
+  notFoundHandler
+} from "./middleware/index.js";
+
 import express from "express";
 
 // import indexRouter from "./api/index.js";
@@ -28,6 +39,10 @@ app.use(
   })
 );
 
+app.get("/health", (req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 // app.use("/", indexRouter);
 
 // 正式網址: https://67021954e997.ngrok-free.app/line_demo
@@ -41,9 +56,23 @@ app.use("/linebot_ai", express.raw({ type: "application/json" }), linebotAiRoute
 //openai 測試用
 // app.use("/openai",openaiRouter);
 
+// 404 處理
+app.use(notFoundHandler);
+
+// 錯誤處理
+app.use(errorHandler);
+
 export const api = onRequest({
   region: "asia-east1",
   cors: false,
   minInstances: 0,
-  secrets: [defineSecret("LINE_SECRET"), defineSecret("LINE_ACCESS_TOKEN"), defineSecret("OPENAI_API_KEY"), defineSecret("GCLOUD_PROJECT_ID"), defineSecret("FIRESTORE_DATABASE_ID")],
+  secrets: [
+    defineSecret("LINE_SECRET"), 
+    defineSecret("LINE_ACCESS_TOKEN"), 
+    defineSecret("OPENAI_API_KEY"), 
+    defineSecret("GCLOUD_PROJECT_ID"), 
+    defineSecret("FIRESTORE_DATABASE_ID"),
+    // defineSecret("JWT_SECRET"),        // 如果需要 JWT
+    // defineSecret("API_KEYS"),          // 如果需要 API Key
+  ],
 }, app);
